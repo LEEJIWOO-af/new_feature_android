@@ -32,6 +32,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // 앱을 시작하자마자 플러터 엔진 초기화
+        createFreshFlutterEngine()
+
         setContent {
             New_feature_androidTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -49,6 +52,9 @@ class MainActivity : ComponentActivity() {
         // create a new FlutterEngine
         val flutterEngine = FlutterEngine(this)
 
+        // 플러터 화면의 경로를 네비게이션으로 지정하도록 변경
+        flutterEngine.navigationChannel.setInitialRoute("/custom1")
+
         // Dart run
         flutterEngine.dartExecutor.executeDartEntrypoint(
             DartExecutor.DartEntrypoint.createDefault()
@@ -61,12 +67,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun openFlutterScreen() {
-        createFreshFlutterEngine()
-
-        // Flutter 모듈에서 정한 cumstom1 이라는 이름의 경로를 지정
+        // 캐싱된 플러터 엔진을 사용하도록 변경
         val intent = FlutterActivity
-            .withNewEngine()
-            .initialRoute("/custom1")
+            .withCachedEngine(ENGINE_ID)
             .build(this)
 
         startActivity(intent)

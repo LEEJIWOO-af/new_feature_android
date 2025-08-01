@@ -22,15 +22,11 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
-import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : ComponentActivity() {
     companion object {
         private const val ENGINE_ID = "new_feature_flutter_module"
-        private const val CHANNEL_NAME = "com.example.module-test/custom1"
     }
-
-    private var methodChannel: MethodChannel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,42 +57,13 @@ class MainActivity : ComponentActivity() {
         // Store the FlutterEngine in the cache
         FlutterEngineCache.getInstance().put(ENGINE_ID, flutterEngine)
 
-        // MethodChannel setup
-        methodChannel = MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            CHANNEL_NAME
-        )
-
         return flutterEngine
-    }
-
-    private fun sendMessageToFlutter(message: String) {
-        methodChannel?.invokeMethod(
-            "getUserToken",
-            message,
-            object : MethodChannel.Result {
-                override fun success(result: Any?) {
-                    println("Flutter Response: $result")
-                }
-
-                override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                    println("Flutter Error: $errorCode - $errorMessage")
-                }
-
-                override fun notImplemented() {
-                    println("Flutter not existed")
-                }
-            }
-        )
     }
 
     private fun openFlutterScreen() {
         createFreshFlutterEngine()
 
-        android.os.Handler(mainLooper).postDelayed({
-            sendMessageToFlutter("Android sent data: ${System.currentTimeMillis()}")
-        }, 500)
-
+        // Flutter 모듈에서 정한 cumstom1 이라는 이름의 경로를 지정
         val intent = FlutterActivity
             .withNewEngine()
             .initialRoute("/custom1")
@@ -109,7 +76,6 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         FlutterEngineCache.getInstance().get(ENGINE_ID)?.destroy()
         FlutterEngineCache.getInstance().remove(ENGINE_ID)
-        methodChannel = null
     }
 
     @Composable
@@ -134,18 +100,10 @@ class MainActivity : ComponentActivity() {
             ) {
                 Button(
                     onClick = {
-                        sendMessageToFlutter("Data from button: ${System.currentTimeMillis()}")
-                    }
-                ) {
-                    Text("動作")
-                }
-
-                Button(
-                    onClick = {
                         openFlutterScreen()
                     }
                 ) {
-                    Text("Flutterへ移動")
+                    Text("Move to Flutter")
                 }
             }
         }

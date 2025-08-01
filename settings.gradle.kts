@@ -23,15 +23,22 @@ dependencyResolutionManagement {
 rootProject.name = "new_feature_android"
 include(":app")
 
-// setup Flutter Module
+// Flutter Module 설정
 val flutterProjectRoot = rootDir.parentFile
-val flutter = File(flutterProjectRoot, "new_feature_flutter_module")
-val flutterAndroid = File(flutter, ".android")
+val flutterModuleName = "new_feature_flutter_module"
+val flutterModulePath = File(flutterProjectRoot, flutterModuleName)
 
-if (flutterAndroid.exists()) {
-    // Flutter module import
-    val flutterSettings = File(flutterAndroid, "include_flutter.groovy")
-    if (flutterSettings.exists()) {
-        apply(from = flutterSettings)
+if (flutterModulePath.exists()) {
+    val flutterAndroidPath = File(flutterModulePath, ".android")
+    val includeFlutterScript = File(flutterAndroidPath, "include_flutter.groovy")
+
+    if (includeFlutterScript.exists()) {
+        println("✅ Flutter module exists: $flutterModuleName")
+        apply(from = includeFlutterScript)
+    } else {
+        println("⚠️ Flutter module found but, not initialized.")
+        println("please run flutter pub get.")
     }
+} else {
+    println("⚠️ Flutter module not found: $flutterModuleName")
 }

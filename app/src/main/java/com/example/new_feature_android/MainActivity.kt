@@ -17,16 +17,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.new_feature_android.models.UserInfo
 import com.example.new_feature_android.ui.theme.New_feature_androidTheme
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : ComponentActivity() {
     companion object {
         private const val ENGINE_ID = "new_feature_flutter_module"
+        private const val CHANNEL = "com.example.new_feature_android/custom1"
     }
+
+    private var methodChannel: MethodChannel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +60,9 @@ class MainActivity : ComponentActivity() {
         // 플러터 화면의 경로를 네비게이션으로 지정하도록 변경
         flutterEngine.navigationChannel.setInitialRoute("/custom1")
 
+        // MethodChannel 설정
+        setupMethodChannel(flutterEngine)
+
         // Dart run
         flutterEngine.dartExecutor.executeDartEntrypoint(
             DartExecutor.DartEntrypoint.createDefault()
@@ -64,6 +72,38 @@ class MainActivity : ComponentActivity() {
         FlutterEngineCache.getInstance().put(ENGINE_ID, flutterEngine)
 
         return flutterEngine
+    }
+
+    private fun setupMethodChannel(flutterEngine: FlutterEngine) {
+        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+
+        methodChannel?.setMethodCallHandler { call, result ->
+            // 2개의 함수로 나눠서 서로 다른 데이터를 보내보도록 한다.
+            when (call.method) {
+                "getUserInfo" -> {
+                    try {
+                        // 더미 사용자 정보 생성
+                        val userList = UserInfo.getDummyUserList()
+                        val userMaps = userList.map { it.toMap() }
+                        result.success(userMaps)
+                    } catch (e: Exception) {
+                        result.error("ERROR", "Failed to get user info", e.message)
+                    }
+                }
+                "getCurrentUser" -> {
+                    try {
+                        // 현재 사용자 정보 (첫 번째 사용자를 현재 사용자로 가정)
+                        val currentUser = UserInfo.getDummyUserList().first()
+                        result.success(currentUser.toMap())
+                    } catch (e: Exception) {
+                        result.error("ERROR", "Failed to get current user", e.message)
+                    }
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
     }
 
     private fun openFlutterScreen() {
@@ -103,6 +143,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 Button(
                     onClick = {
+                        // Flutter 화면을 열기 전에 사용자 정보를 전송
                         openFlutterScreen()
                     }
                 ) {

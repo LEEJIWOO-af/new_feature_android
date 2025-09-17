@@ -138,7 +138,6 @@ class MainActivity : ComponentActivity() {
             ) {
                 Button(
                     onClick = {
-                        // Flutter 화면을 열기 전에 사용자 정보를 전송
                         openFlutterScreen()
                     }
                 ) {

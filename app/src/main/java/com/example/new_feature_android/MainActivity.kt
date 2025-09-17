@@ -89,7 +89,9 @@ class MainActivity : ComponentActivity() {
                 }
                 "getCurrentUser" -> {
                     try {
-                        val currentUser = UserInfo.getDummyUserList().first()
+                        val currentUser = UserInfo.getDummyUserList().first {
+                            it.name == "Lee"
+                        }
                         result.success(currentUser.toMap())
                     } catch (e: Exception) {
                         result.error("ERROR", "Failed to get current user", e.message)

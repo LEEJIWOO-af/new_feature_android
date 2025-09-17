@@ -37,7 +37,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // 앱을 시작하자마자 플러터 엔진 초기화
         createFreshFlutterEngine()
 
         setContent {
@@ -57,10 +56,10 @@ class MainActivity : ComponentActivity() {
         // create a new FlutterEngine
         val flutterEngine = FlutterEngine(this)
 
-        // 플러터 화면의 경로를 네비게이션으로 지정하도록 변경
+        // set Flutter screen native route
         flutterEngine.navigationChannel.setInitialRoute("/custom1")
 
-        // MethodChannel 설정
+        // MethodChannel setup
         setupMethodChannel(flutterEngine)
 
         // Dart run
@@ -78,11 +77,9 @@ class MainActivity : ComponentActivity() {
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
 
         methodChannel?.setMethodCallHandler { call, result ->
-            // 2개의 함수로 나눠서 서로 다른 데이터를 보내보도록 한다.
             when (call.method) {
                 "getUserInfo" -> {
                     try {
-                        // 더미 사용자 정보 생성
                         val userList = UserInfo.getDummyUserList()
                         val userMaps = userList.map { it.toMap() }
                         result.success(userMaps)
@@ -92,7 +89,6 @@ class MainActivity : ComponentActivity() {
                 }
                 "getCurrentUser" -> {
                     try {
-                        // 현재 사용자 정보 (첫 번째 사용자를 현재 사용자로 가정)
                         val currentUser = UserInfo.getDummyUserList().first()
                         result.success(currentUser.toMap())
                     } catch (e: Exception) {
@@ -107,7 +103,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun openFlutterScreen() {
-        // 캐싱된 플러터 엔진을 사용하도록 변경
         val intent = FlutterActivity
             .withCachedEngine(ENGINE_ID)
             .build(this)
